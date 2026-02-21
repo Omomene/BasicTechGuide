@@ -20,7 +20,7 @@ function Header() {
 
         <nav className="header-nav">
           {categories.map((cat, index) => (
-            <Link key={index} to={`/category/${cat.slug}`}>
+            <Link key={index} to={`/${cat.slug}`}>
               {cat.name}
             </Link>
           ))}
