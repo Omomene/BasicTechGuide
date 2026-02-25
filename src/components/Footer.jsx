@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <footer className="footer">
+    <footer id="footer">
       <div className="footer-links">
         <Link to="/privacy-policy">Privacy Policy</Link>
         <Link to="/terms">Terms & Conditions</Link>
@@ -10,9 +10,9 @@ function Footer() {
         <Link to="/contact-us">Contact Us</Link>
       </div>
 
-      <div className="footer-copy">
+      <p>
         © 2026 BasicTechGuide
-      </div>
+      </p>
     </footer>
   );
 }

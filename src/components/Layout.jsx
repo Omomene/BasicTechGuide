@@ -7,8 +7,8 @@ function Layout({ children }) {
     <>
       <Header />
       <div className="container">
-        <main className="content">{children}</main>
-        <aside className="sidebar">
+        <main className="post entry">{children}</main>
+        <aside id="sidebar">
           <Sidebar />
         </aside>
       </div>

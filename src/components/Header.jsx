@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { categories } from "../data/categories";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Header() {
   const [query, setQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 60);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const results = categories
     .flatMap(cat => cat.guides)
@@ -12,27 +22,50 @@ function Header() {
     );
 
   return (
-    <header className="header">
-      <div className="header-inner">
-        <div className="logo">
-          <Link to="/">BasicTechGuide</Link>
+    <header id="header" className={scrolled ? "scrolled" : ""}>
+      <div className="container">
+
+        {/* Logo */}
+        <div id="logo">
+          <h1>BasicTechGuide</h1>
+          <p>Simple. Practical. Clear.</p>
         </div>
 
-        <nav className="header-nav">
-          {categories.map((cat, index) => (
-            <Link key={index} to={`/${cat.slug}`}>
-              {cat.name}
-            </Link>
-          ))}
+        {/* Navigation */}
+        <nav>
+          <ul>
+            {categories.map((cat, index) => (
+              <li
+                key={index}
+                className={
+                  location.pathname.startsWith(`/${cat.slug}`)
+                    ? "current"
+                    : ""
+                }
+              >
+                <Link
+                  to={`/${cat.slug}`}
+                  className={cat.pro ? "pro" : ""}
+                >
+                  {cat.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        <div className="search-wrapper">
-          <input
-            type="text"
-            placeholder="Search guides..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        {/* Search */}
+        <div id="search">
+          <form>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="field"
+            />
+            <button type="submit" className="button">🔍</button>
+          </form>
 
           {query && results.length > 0 && (
             <ul className="search-results">
@@ -44,6 +77,7 @@ function Header() {
             </ul>
           )}
         </div>
+
       </div>
     </header>
   );
