@@ -4,7 +4,7 @@ import StepBlock from "../../components/StepBlock";
 import Breadcrumb from "../../components/Breadcrumb";
 
 import step1 from "../../assets/images/excel/create-chart/step1.png";
-import step2 from "../../assets/images/excel/create-chart/step2.png";
+import step2 from "../../assets/images/excel/create-chart/Step2.png";
 import step3 from "../../assets/images/excel/create-chart/step3.png";
 import step4 from "../../assets/images/excel/create-chart/step-4.webp";
 import step5 from "../../assets/images/excel/create-chart/step-5.webp";
