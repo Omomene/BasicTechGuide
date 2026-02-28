@@ -49,6 +49,7 @@ function Sidebar() {
 
   return (
     <div id="sidebar" ref={wrapperRef}>
+      <p>Simple pratical guides</p>
       {categories.map((cat) => (
         <div key={cat.slug} className="sidebar-category">
           <h3
@@ -57,7 +58,7 @@ function Sidebar() {
           >
             {cat.name}{" "}
             <span className={`arrow ${openCategory === cat.slug ? "open" : ""}`}>
-              ▶
+              ▸
             </span>
           </h3>
 
@@ -77,11 +78,6 @@ function Sidebar() {
           )}
         </div>
       ))}
-
-      {/* Last element (AdBlock) */}
-      <div className="sidebar-last" ref={adRef}>
-        <AdBlock />
-      </div>
     </div>
   );
 }

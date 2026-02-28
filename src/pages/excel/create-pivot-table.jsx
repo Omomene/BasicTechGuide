@@ -3,10 +3,6 @@ import TutorialLayout from "../../components/TutorialLayout";
 import StepBlock from "../../components/StepBlock";
 import Breadcrumb from "../../components/Breadcrumb";
 
-import step1 from "../../assets/images/excel/create-pivot-table/step-1.webp";
-import step2 from "../../assets/images/excel/create-pivot-table/step-2.webp";
-import step3 from "../../assets/images/excel/create-pivot-table/step-3.webp";
-
 function CreatePivotTable() {
   const category = { name: "Excel", slug: "excel" };
   const guide = { title: "Create Pivot Table" };
@@ -18,9 +14,15 @@ function CreatePivotTable() {
         title={guide.title}
         description="Learn how to create a pivot table step-by-step with screenshots."
       >
+        <p>
+          Charts in Excel help you visualize your data quickly and clearly. Before diving into the steps, 
+          make sure your data is organized, with labels and values in proper rows and columns. 
+          This introduction will prepare you to create accurate and meaningful charts.
+        </p>
+
         <StepBlock
           title="Step 1 – Select Your Data"
-          image={step1}
+          image="/assets/images/excel/create-pivot-table/step-1.webp"
           alt="Excel dataset selected before creating pivot table"
         >
           Select your entire dataset including headers.
@@ -28,7 +30,7 @@ function CreatePivotTable() {
 
         <StepBlock
           title="Step 2 – Click Insert → PivotTable"
-          image={step2}
+          image="/assets/images/excel/create-pivot-table/step-1.webp"
           alt="Excel insert tab pivot table button"
         >
           Click Insert and choose PivotTable.
@@ -36,7 +38,7 @@ function CreatePivotTable() {
 
         <StepBlock
           title="Step 3 – Confirm Data Range"
-          image={step3}
+          image="/assets/images/excel/create-pivot-table/step-1.webp"
           alt="Excel pivot table dialog box data range"
         >
           Confirm the data range and choose new worksheet.

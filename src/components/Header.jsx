@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { categories } from "../data/categories";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "../assets/BasicTechGuide-logo.png";
 
 function Header() {
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,11 +17,13 @@ function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const results = categories
-    .flatMap(cat => cat.guides)
-    .filter(guide =>
-      guide.title.toLowerCase().includes(query.toLowerCase())
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+    setQuery("");
+  };
 
   return (
     <header id="header" className={scrolled ? "scrolled" : ""}>
@@ -27,8 +31,9 @@ function Header() {
 
         {/* Logo */}
         <div id="logo">
-          <h1>BasicTechGuide</h1>
-          <p>Simple. Practical. Clear.</p>
+          <Link to="/">
+            <img src={logo} alt="BasicTechGuide Logo" />
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -56,26 +61,15 @@ function Header() {
 
         {/* Search */}
         <div id="search">
-          <form>
+          <form onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search guides and tutorials..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="field"
+              className="field full"
             />
-            <button type="submit" className="button">🔍</button>
           </form>
-
-          {query && results.length > 0 && (
-            <ul className="search-results">
-              {results.slice(0, 5).map((guide, idx) => (
-                <li key={idx}>
-                  <Link to={guide.path}>{guide.title}</Link>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
 
       </div>

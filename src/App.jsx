@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import SearchResults from "./pages/SearchResults";
 import { categories } from "./data/categories";
 import CategoryPage from "./pages/CategoryPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -44,7 +45,8 @@ function App() {
         )}
 
         {/* Optional: 404 Page */}
-        <Route path="*" element={<div>Page not found</div>} />
+        <Route path="*" element={<div>Page not found</div>} />  
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/disclaimer" element={<Disclaimer />} />
