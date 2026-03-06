@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { categories } from "../data/categories";
+import { guidesMeta } from "../data/guidesMeta";
 import Layout from "../components/Layout";
 
 function CategoryPage() {
@@ -11,16 +12,38 @@ function CategoryPage() {
 
   return (
     <Layout>
-        <div style={{ padding: "2rem" }}>
+      <div className="search-container">
         <h1>{category.name}</h1>
-        <ul>
-            {category.guides.map((guide) => (
-            <li key={guide.path}>
-                <Link to={guide.path}>{guide.title}</Link>
-            </li>
-            ))}
-        </ul>
-        </div>
+
+        {category.guides.length > 0 ? (
+          <div className="search-list">
+            {category.guides.map((guide, idx) => {
+              const meta = guidesMeta[guide.path];
+
+              return (
+                <Link to={guide.path} key={idx} className="search-item">
+                  <div className="search-text">
+                    <h2>{guide.title}</h2>
+                    {meta?.intro ? (
+                      <p>{meta.intro}</p>
+                    ) : (
+                      <p>Click to view the full step-by-step guide.</p>
+                    )}
+                  </div>
+
+                  {meta?.thumbnail && (
+                    <div className="search-thumb">
+                      <img src={meta.thumbnail} alt={guide.title} />
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <p>No guides found in this category.</p>
+        )}
+      </div>
     </Layout>
   );
 }
