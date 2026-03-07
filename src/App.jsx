@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import SearchResults from "./pages/SearchResults";
@@ -8,49 +8,54 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Disclaimer from "./pages/Disclaimer";
 import ContactUs from "./pages/ContactUs";
+import AdminPanel from "./admin/AdminPanel";
 
-// Import all tutorial pages dynamically
+
+// Dynamic import of all .jsx pages inside pages folder
 const tutorials = import.meta.glob("./pages/**/*.jsx");
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Home Route */}
+
+        {/* Home */}
         <Route path="/" element={<Home />} />
-        {/* Dynamic Category Routes */}
-        {categories.map((category) => (
-          <Route
-            key={category.slug}
-            path="/:categorySlug" element={<CategoryPage />} 
-          />
-        ))}
-        {/* Dynamic Tutorial Routes */}
-        {categories.flatMap((category) =>
-          category.guides.map((guide) => {
-            const filePath = `./pages${guide.path}.jsx`; // matches glob key
+
+        {/* Static pages */}
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/admin" element={<AdminPanel />} />
+
+        {/* Dynamic tutorial routes */}
+        {categories.flatMap(category =>
+          category.guides.map(guide => {
+            const filePath = `./pages${guide.path}.jsx`;
             const Component = React.lazy(tutorials[filePath]);
+
             return (
               <Route
                 key={guide.path}
                 path={guide.path}
                 element={
-                  <React.Suspense fallback={<div>Loading...</div>}>
+                  <Suspense fallback={<div>Loading guide...</div>}>
                     <Component />
-                  </React.Suspense>
+                  </Suspense>
                 }
               />
             );
           })
         )}
 
-        {/* Optional: 404 Page */}
-        <Route path="*" element={<div>Page not found</div>} />  
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/disclaimer" element={<Disclaimer />} />
-        <Route path="/contact-us" element={<ContactUs />} />
+        {/* Dynamic category routes */}
+        <Route path="/:categorySlug" element={<CategoryPage />} />
+
+        {/* 404 Page */}
+        <Route path="*" element={<div>Page not found</div>} />
+
       </Routes>
     </BrowserRouter>
   );

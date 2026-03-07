@@ -122,5 +122,25 @@ export const guidesMeta = {
   "/Terms": {
     "intro": "This is where your privacy policy text will go.",
     "thumbnail": null
+  },
+  "/excel/xlookup-function": {
+    "intro": "This guide explains how to xlookup function step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/xlookup-function/xlookup-function.png"
+  },
+  "/excel/vlookup-in-excel": {
+    "intro": "This guide explains how to vlookup in excel step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/vlookup-in-excel/largest-value-smaller-than-lookup-value.png"
+  },
+  "/excel/tables-in-excel": {
+    "intro": "This guide explains how to tables in excel step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/tables-in-excel/xlookup-function.png"
+  },
+  "/excel/insert-shapes-in-excel": {
+    "intro": "This guide explains how to insert shapes in excel step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": ""
+  },
+  "/excel/trim-function-in-excel": {
+    "intro": "This guide explains how to trim function in excel step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/trim-function-in-excel/first-match.png"
   }
 };

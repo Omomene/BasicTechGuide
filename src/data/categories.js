@@ -22,6 +22,26 @@ export const categories = [
       {
         "title": "Use Filters",
         "path": "/excel/use-filters"
+      },
+      {
+        "title": "Xlookup Function",
+        "path": "/excel/xlookup-function"
+      },
+      {
+        "title": "Vlookup in Excel",
+        "path": "/excel/vlookup-in-excel"
+      },
+      {
+        "title": "Tables in Excel",
+        "path": "/excel/tables-in-excel"
+      },
+      {
+        "title": "Insert Shapes in Excel",
+        "path": "/excel/insert-shapes-in-excel"
+      },
+      {
+        "title": "Trim Function in Excel",
+        "path": "/excel/trim-function-in-excel"
       }
     ]
   },

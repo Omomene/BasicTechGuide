@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import parser from "@babel/parser";
 import traverseModule from "@babel/traverse";
+import { exec } from "child_process";
+
 
 const traverse = traverseModule.default;
 
@@ -172,3 +174,5 @@ fs.writeFileSync(
 );
 
 console.log("guidesMeta.js generated successfully");
+
+exec("node scripts/generateGuidesMeta.js");

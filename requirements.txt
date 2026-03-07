@@ -1,0 +1,7 @@
+react 
+express 
+multer 
+cors
+react-quill 
+react-icons
+@tiptap/react @tiptap/starter-kit @tiptap/extension-image react-icons --legacy-peer-deps

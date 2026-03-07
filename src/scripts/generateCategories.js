@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { exec } from "child_process";
 
 // Path to your pages folder
 const pagesDir = path.join(process.cwd(), "src", "pages");
@@ -55,3 +56,5 @@ fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
 console.log("categories.js generated successfully!");
+
+exec("node scripts/generateCategories.js");
