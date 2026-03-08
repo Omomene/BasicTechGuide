@@ -12,8 +12,8 @@ export const guidesMeta = {
     "thumbnail": null
   },
   "/excel/create-chart": {
-    "intro": "Charts in Excel help you visualize your data quickly and clearly. Before diving into the steps, make sure your data is organized, with labels and values in proper rows and...",
-    "thumbnail": "/assets/images/excel/create-chart/step1.png"
+    "intro": "This guide explains how to create chart step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/create-chart/first-match.png"
   },
   "/excel/create-pivot-table": {
     "intro": "Charts in Excel help you visualize your data quickly and clearly. Before diving into the steps, make sure your data is organized, with labels and values in proper rows and...",
@@ -131,16 +131,28 @@ export const guidesMeta = {
     "intro": "This guide explains how to vlookup in excel step-by-step. Follow the instructions below to complete the task efficiently.",
     "thumbnail": "/assets/images/excel/vlookup-in-excel/largest-value-smaller-than-lookup-value.png"
   },
-  "/excel/tables-in-excel": {
-    "intro": "This guide explains how to tables in excel step-by-step. Follow the instructions below to complete the task efficiently.",
-    "thumbnail": "/assets/images/excel/tables-in-excel/xlookup-function.png"
-  },
   "/excel/insert-shapes-in-excel": {
     "intro": "This guide explains how to insert shapes in excel step-by-step. Follow the instructions below to complete the task efficiently.",
     "thumbnail": ""
   },
   "/excel/trim-function-in-excel": {
     "intro": "This guide explains how to trim function in excel step-by-step. Follow the instructions below to complete the task efficiently.",
-    "thumbnail": "/assets/images/excel/trim-function-in-excel/first-match.png"
+    "thumbnail": "/assets/images/excel/trim-function-in-excel/undefined"
+  },
+  "/netsuite/create-a-saved-search": {
+    "intro": "This guide explains how to create a saved search step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/netsuite/create-a-saved-search/undefined"
+  },
+  "/excel/create-pie-chart": {
+    "intro": "This guide explains how to create pie chart step-by-step. Follow the instructions below to complete the task efficiently.",
+    "thumbnail": "/assets/images/excel/create-pie-chart/undefined"
+  },
+  "/netsuite/save-netsuite": {
+    "intro": "This guide explains save netsuite step-by-step.",
+    "thumbnail": "/assets/images/netsuite/save-netsuite/first-match.png"
+  },
+  "/netsuite/dashboard-setup": {
+    "intro": "This guide explains dashboard setup step-by-step.",
+    "thumbnail": "/assets/images/netsuite/dashboard-setup/xlookup-function.png"
   }
 };

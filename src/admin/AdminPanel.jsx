@@ -1,338 +1,253 @@
 // src/pages/AdminPanel.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import StepForm from "../components/StepForm";
+import { FaPlus, FaSpinner } from "react-icons/fa";
 
 function AdminPanel() {
   const [category, setCategory] = useState("");
   const [guideTitle, setGuideTitle] = useState("");
-  const [steps, setSteps] = useState([
-    { type: "step", title: "", content: "" }
-  ]);
-
+  const [steps, setSteps] = useState([{ type: "step", title: "", content: "", image: "", imageFile: null }]);
   const [images, setImages] = useState([]);
+  const [existingGuides, setExistingGuides] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const fileInputRef = useRef(null);
+  const categories = ["excel","netsuite","powerautomate","powerbi","powerpoint"];
 
-  const categories = [
-    "excel",
-    "netsuite",
-    "powerautomate",
-    "powerbi",
-    "powerpoint"
-  ];
+  // -----------------------------
+  // LOAD EXISTING GUIDES
+  // -----------------------------
+  const loadGuides = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/get-guides");
+      const data = await res.json();
+      setExistingGuides(data.guides || []);
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to load guides");
+    }
+    setLoading(false);
+  };
 
-  // UPDATE STEP
+  useEffect(() => { loadGuides(); }, []);
+
+  const groupGuidesByCategory = (guides) => {
+    return guides.reduce((acc, guide) => {
+      if (!acc[guide.category]) acc[guide.category] = [];
+      acc[guide.category].push(guide);
+      return acc;
+    }, {});
+  };
+
+  // -----------------------------
+  // HANDLE GUIDE EDIT
+  // -----------------------------
+  const handleEditGuide = async (path) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/get-guide?path=${path}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setCategory(data.category);
+      setGuideTitle(data.guideTitle);
+      setSteps(data.steps.map(s => ({ ...s, imageFile: null })));
+      setImages([]);
+      setMessage(`Loaded guide: ${data.guideTitle}`);
+    } catch (err) {
+      setMessage(`❌ ${err.message}`);
+    }
+    setLoading(false);
+  };
+
+  const handleDeleteGuide = async (path) => {
+    if (!window.confirm("Delete this guide?")) return;
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/delete-guide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setMessage("✅ Guide deleted");
+      loadGuides();
+    } catch (err) {
+      setMessage(`❌ ${err.message}`);
+    }
+    setLoading(false);
+  };
+
+  // -----------------------------
+  // STEP HANDLERS
+  // -----------------------------
   const handleStepChange = (index, data) => {
     const updated = [...steps];
     updated[index] = data;
     setSteps(updated);
   };
 
-  // DELETE STEP
-  const handleDeleteStep = (index) => {
-    const updated = steps.filter((_, i) => i !== index);
+  const handleDeleteStep = (index) => setSteps(steps.filter((_, i) => i !== index));
+  const handleAddStep = () => setSteps([...steps, { type: "step", title: "", content: "", image: "", imageFile: null }]);
+  const handleAddParagraph = () => setSteps([...steps, { type: "paragraph", content: "" }]);
+  const handleStepImageChange = (e, idx) => {
+    const file = e.target.files[0] || null;
+    const updated = [...steps];
+    updated[idx].imageFile = file;
+    updated[idx].image = "";
     setSteps(updated);
   };
+  const handleGlobalImagesChange = (e) => setImages(Array.from(e.target.files));
 
-  // ADD STEP
-  const handleAddStep = () => {
-    setSteps([...steps, { type: "step", title: "", content: "" }]);
-  };
-
-  // ADD PARAGRAPH
-  const handleAddParagraph = () => {
-    setSteps([...steps, { type: "paragraph", content: "" }]);
-  };
-
-  const handleImageChange = (e) => {
-    setImages(Array.from(e.target.files));
-  };
-
-  // SUBMIT
+  // -----------------------------
+  // SUBMIT GUIDE
+  // -----------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!category || !guideTitle) {
-      setMessage("❌ Please select a category and enter a guide title.");
+      setMessage("❌ Category and title required");
       return;
     }
-
-    if (steps.length === 0) {
-      setMessage("❌ Please add at least one block.");
-      return;
-    }
-
     setLoading(true);
     setMessage("");
 
     const formData = new FormData();
-
     formData.append("category", category);
     formData.append("guideTitle", guideTitle);
     formData.append("steps", JSON.stringify(steps));
-
-    steps.forEach((step) => {
-      if (step.imageFile) {
-        formData.append("images", step.imageFile);
-      }
-    });
-
-    images.forEach((img) => formData.append("images", img));
+    steps.forEach(s => { if (s.imageFile) formData.append("images", s.imageFile); });
+    images.forEach(img => formData.append("images", img));
 
     try {
-      const res = await fetch("http://localhost:5000/generate-guide", {
-        method: "POST",
-        body: formData
-      });
-
-      const text = await res.text();
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error("Server returned invalid JSON.");
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || "Guide generation failed.");
-      }
-
-      const slug = guideTitle
-        .toLowerCase()
-        .replace(/[^\w\s]/g, "")
-        .replace(/\s+/g, "-");
-
-      const guidePath = `/${category}/${slug}`;
-
-      setMessage(
-        `✅ Guide created successfully!
-
-File: ${data.jsxFile || slug}
-
-View: ${guidePath}`
-      );
-
-      // RESET FORM
-      setCategory("");
-      setGuideTitle("");
-      setSteps([{ type: "step", title: "", content: "" }]);
-      setImages([]);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-
+      const url = guideTitle && steps[0]?.newFile ? "http://localhost:5000/save-guide" : "http://localhost:5000/generate-guide";
+      const res = await fetch(url, { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMessage("✅ Guide saved");
+      loadGuides();
     } catch (err) {
       setMessage(`❌ ${err.message}`);
     }
-
     setLoading(false);
   };
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
-    <div style={styles.page}>
-
-      <h1 style={styles.title}>Guide Editor</h1>
-
-      {message && (
-        <div style={styles.message}>
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-
-        {/* CATEGORY */}
-        <div style={styles.section}>
-          <label>Category</label>
-
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={styles.input}
-          >
-            <option value="">Select category</option>
-            {categories.map((cat) => (
-              <option key={cat}>{cat}</option>
+    <div style={styles.container}>
+      {/* SIDEBAR */}
+      <div style={styles.sidebar}>
+        <h2 style={styles.sidebarTitle}>Guides</h2>
+        {loading && <div style={styles.spinner}><FaSpinner className="spin" /> Loading...</div>}
+        {Object.entries(groupGuidesByCategory(existingGuides)).map(([cat, guides]) => (
+          <div key={cat} style={styles.categoryBlock}>
+            <h3 style={styles.categoryTitle}>{cat}</h3>
+            {guides.map(g => (
+              <div key={g.path} style={styles.guideItem}>
+                <span style={styles.guideTitle}>{g.title}</span>
+                <div style={styles.guideButtons}>
+                  <button style={styles.editBtn} onClick={() => handleEditGuide(g.path)}>Edit</button>
+                  <button style={styles.deleteBtn} onClick={() => handleDeleteGuide(g.path)}>Delete</button>
+                </div>
+              </div>
             ))}
-          </select>
-        </div>
-
-        {/* TITLE */}
-        <div style={styles.section}>
-          <label>Guide Title</label>
-
-          <input
-            type="text"
-            value={guideTitle}
-            onChange={(e) => setGuideTitle(e.target.value)}
-            placeholder="Example: Create a Chart in Excel"
-            style={styles.input}
-          />
-        </div>
-
-        {/* IMAGE UPLOAD */}
-        <div style={styles.section}>
-          <label>Optional Images</label>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-          />
-        </div>
-
-        {/* STEPS */}
-        <h2 style={{ marginTop: "40px" }}>Guide Content</h2>
-
-        {steps.map((step, idx) => (
-          <StepForm
-            key={idx}
-            stepIndex={idx}
-            stepData={step}
-            onChange={handleStepChange}
-            onDelete={handleDeleteStep}
-          />
-        ))}
-
-        {/* ADD BLOCK BUTTONS */}
-        <div style={styles.addButtons}>
-
-          <button
-            type="button"
-            onClick={handleAddStep}
-            style={styles.addStep}
-          >
-            + Add Step
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAddParagraph}
-            style={styles.addParagraph}
-          >
-            + Add Paragraph
-          </button>
-
-        </div>
-
-        {/* SUBMIT */}
-        <button
-          type="submit"
-          disabled={loading}
-          style={styles.submit}
-        >
-          {loading ? "Generating Guide..." : "Generate Guide"}
-        </button>
-
-      </form>
-
-      {/* LIVE ARTICLE PREVIEW */}
-      <div style={styles.preview}>
-        <h2>Live Article Preview</h2>
-
-        <h1>{guideTitle}</h1>
-
-        {steps.map((block, i) => (
-          <div key={i} style={{ marginBottom: "25px" }}>
-            {block.type === "step" && <h3>{block.title}</h3>}
-
-            <div dangerouslySetInnerHTML={{ __html: block.content }} />
-
-            {block.imageFile && (
-              <img
-                src={URL.createObjectURL(block.imageFile)}
-                style={{ maxWidth: "100%", marginTop: "10px" }}
-              />
-            )}
           </div>
         ))}
       </div>
 
+      {/* EDITOR */}
+      <div style={styles.editor}>
+        <h1>Guide Editor</h1>
+        {message && <div style={styles.message}>{message}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div style={styles.section}>
+            <label>Category</label>
+            <select value={category} onChange={e => setCategory(e.target.value)} style={styles.input}>
+              <option value="">Select category</option>
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          <div style={styles.section}>
+            <label>Guide Title</label>
+            <input type="text" value={guideTitle} onChange={e => setGuideTitle(e.target.value)} style={styles.input} />
+          </div>
+
+          <div style={styles.section}>
+            <label>Optional Images (Drag & Drop)</label>
+            <input ref={fileInputRef} type="file" multiple onChange={handleGlobalImagesChange} />
+          </div>
+
+          <h2>Guide Content</h2>
+          {steps.map((step, idx) => (
+            <StepForm
+              key={idx} stepIndex={idx} stepData={step}
+              onChange={handleStepChange} onDelete={handleDeleteStep}
+              onImageChange={handleStepImageChange}
+            />
+          ))}
+
+          <div style={styles.addButtons}>
+            <button type="button" onClick={handleAddStep} style={styles.addStep}><FaPlus /> Add Step</button>
+            <button type="button" onClick={handleAddParagraph} style={styles.addParagraph}><FaPlus /> Add Paragraph</button>
+          </div>
+
+          <button type="submit" style={styles.submit} disabled={loading}>
+            {loading ? <FaSpinner className="spin" /> : "Save Guide"}
+          </button>
+        </form>
+
+        {/* LIVE PREVIEW */}
+        <div style={styles.preview}>
+          <h2>Live Preview</h2>
+          <h1>{guideTitle}</h1>
+          {steps.map((block, i) => (
+            <div key={i} style={{ marginBottom: "25px" }}>
+              {block.type === "step" && <h3>{block.title}</h3>}
+              <div dangerouslySetInnerHTML={{ __html: block.content }} />
+              {block.imageFile ? (
+                <img src={URL.createObjectURL(block.imageFile)} alt="preview" style={{ maxWidth: "100%", marginTop: "10px" }} />
+              ) : block.image ? (
+                <img src={block.image} alt="preview" style={{ maxWidth: "100%", marginTop: "10px" }} />
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
+// -----------------------------
+// STYLES
+// -----------------------------
 const styles = {
-
-  page: {
-    maxWidth: "1200px",
-    margin: "40px auto",
-    padding: "20px"
-  },
-
-  title: {
-    fontSize: "32px",
-    marginBottom: "20px"
-  },
-
-  message: {
-    background: "#f3f4f6",
-    padding: "16px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    whiteSpace: "pre-line"
-  },
-
-  section: {
-    marginBottom: "20px"
-  },
-
-  input: {
-    width: "100%",
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ddd"
-  },
-
-  addButtons: {
-    display: "flex",
-    gap: "12px",
-    marginTop: "20px"
-  },
-
-  addStep: {
-    background: "#3b82f6",
-    color: "white",
-    padding: "10px 16px",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-
-  addParagraph: {
-    background: "#10b981",
-    color: "white",
-    padding: "10px 16px",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-
-  submit: {
-    marginTop: "30px",
-    background: "#111827",
-    color: "white",
-    padding: "14px 28px",
-    borderRadius: "8px",
-    border: "none",
-    fontSize: "16px",
-    cursor: "pointer"
-  },
-
-  preview: {
-    marginTop: "60px",
-    padding: "30px",
-    border: "1px solid #eee",
-    borderRadius: "12px",
-    background: "#fafafa"
-  }
-
+  container: { display: "flex", maxWidth: "1600px", margin: "40px auto" },
+  sidebar: { width: "320px", borderRight: "1px solid #eee", padding: "20px", background: "#fafafa", height: "90vh", overflowY: "auto" },
+  editor: { flex: 1, padding: "30px" },
+  sidebarTitle: { fontSize: "22px", marginBottom: "20px" },
+  categoryBlock: { marginBottom: "20px" },
+  categoryTitle: { fontWeight: "bold", marginBottom: "8px" },
+  guideItem: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px", background: "#fff", border: "1px solid #eee", borderRadius: "6px", marginBottom: "6px" },
+  guideTitle: { fontSize: "14px" },
+  guideButtons: { display: "flex", gap: "6px" },
+  editBtn: { background: "#3b82f6", color: "#fff", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer" },
+  deleteBtn: { background: "#ef4444", color: "#fff", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer" },
+  section: { marginBottom: "20px" },
+  input: { width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ddd" },
+  addButtons: { display: "flex", gap: "12px", marginTop: "20px" },
+  addStep: { background: "#3b82f6", color: "white", padding: "10px 16px", border: "none", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" },
+  addParagraph: { background: "#10b981", color: "white", padding: "10px 16px", border: "none", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" },
+  submit: { marginTop: "30px", background: "#111827", color: "white", padding: "14px 28px", borderRadius: "8px", border: "none", fontSize: "16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" },
+  preview: { marginTop: "60px", padding: "30px", border: "1px solid #eee", borderRadius: "12px", background: "#fafafa" },
+  message: { background: "#f3f4f6", padding: "16px", borderRadius: "8px", marginBottom: "20px" },
+  spinner: { display: "flex", alignItems: "center", gap: "8px", color: "#555" }
 };
 
 export default AdminPanel;

@@ -32,16 +32,16 @@ export const categories = [
         "path": "/excel/vlookup-in-excel"
       },
       {
-        "title": "Tables in Excel",
-        "path": "/excel/tables-in-excel"
-      },
-      {
         "title": "Insert Shapes in Excel",
         "path": "/excel/insert-shapes-in-excel"
       },
       {
         "title": "Trim Function in Excel",
         "path": "/excel/trim-function-in-excel"
+      },
+      {
+        "title": "Create Pie Chart",
+        "path": "/excel/create-pie-chart"
       }
     ]
   },
@@ -68,6 +68,18 @@ export const categories = [
       {
         "title": "Personalize Dashboard",
         "path": "/netsuite/personalize-dashboard"
+      },
+      {
+        "title": "Create a saved search",
+        "path": "/netsuite/create-a-saved-search"
+      },
+      {
+        "title": "Save Netsuite",
+        "path": "/netsuite/save-netsuite"
+      },
+      {
+        "title": "Dashboard setup",
+        "path": "/netsuite/dashboard-setup"
       }
     ]
   },
