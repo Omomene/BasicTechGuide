@@ -2,18 +2,41 @@
 import React, { useState, useRef, useEffect } from "react";
 import StepForm from "../components/StepForm";
 import { FaPlus, FaSpinner } from "react-icons/fa";
+import { nanoid } from "nanoid"; // <-- unique IDs for steps
 
 function AdminPanel() {
   const [category, setCategory] = useState("");
   const [guideTitle, setGuideTitle] = useState("");
-  const [steps, setSteps] = useState([{ type: "step", title: "", content: "", image: "", imageFile: null }]);
+  const [steps, setSteps] = useState([{ id: nanoid(), type: "paragraph", content: "" }]);
   const [images, setImages] = useState([]);
   const [existingGuides, setExistingGuides] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [path, setPath] = useState(""); // track current guide path
 
   const fileInputRef = useRef(null);
   const categories = ["excel","netsuite","powerautomate","powerbi","powerpoint"];
+
+  // -----------------------------
+  // MOVE HANDLERS
+  // -----------------------------
+  const moveUp = (index) => {
+    if (index === 0) return;
+    setSteps(prev => {
+      const updated = [...prev];
+      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      return updated;
+    });
+  };
+
+  const moveDown = (index) => {
+    setSteps(prev => {
+      if (index === prev.length - 1) return prev;
+      const updated = [...prev];
+      [updated[index + 1], updated[index]] = [updated[index], updated[index + 1]];
+      return updated;
+    });
+  };
 
   // -----------------------------
   // LOAD EXISTING GUIDES
@@ -44,17 +67,18 @@ function AdminPanel() {
   // -----------------------------
   // HANDLE GUIDE EDIT
   // -----------------------------
-  const handleEditGuide = async (path) => {
+  const handleEditGuide = async (guidePath) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/get-guide?path=${path}`);
+      const res = await fetch(`http://localhost:5000/get-guide?path=${guidePath}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
       setCategory(data.category);
       setGuideTitle(data.guideTitle);
-      setSteps(data.steps.map(s => ({ ...s, imageFile: null })));
+      setSteps(data.steps.map(s => ({ ...s, id: nanoid(), imageFile: null }))); // <-- assign new IDs
       setImages([]);
+      setPath(guidePath); 
       setMessage(`Loaded guide: ${data.guideTitle}`);
     } catch (err) {
       setMessage(`❌ ${err.message}`);
@@ -62,20 +86,26 @@ function AdminPanel() {
     setLoading(false);
   };
 
-  const handleDeleteGuide = async (path) => {
+  const handleDeleteGuide = async (guidePath) => {
     if (!window.confirm("Delete this guide?")) return;
     setLoading(true);
     try {
       const res = await fetch("http://localhost:5000/delete-guide", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path })
+        body: JSON.stringify({ path: guidePath })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-
       setMessage("✅ Guide deleted");
       loadGuides();
+      if (guidePath === path) {
+        setCategory("");
+        setGuideTitle("");
+        setSteps([{ id: nanoid(), type: "paragraph", content: "" }]);
+        setImages([]);
+        setPath("");
+      }
     } catch (err) {
       setMessage(`❌ ${err.message}`);
     }
@@ -92,8 +122,8 @@ function AdminPanel() {
   };
 
   const handleDeleteStep = (index) => setSteps(steps.filter((_, i) => i !== index));
-  const handleAddStep = () => setSteps([...steps, { type: "step", title: "", content: "", image: "", imageFile: null }]);
-  const handleAddParagraph = () => setSteps([...steps, { type: "paragraph", content: "" }]);
+  const handleAddStep = () => setSteps([...steps, { id: nanoid(), type: "step", title: "", content: "", image: "", imageFile: null }]);
+  const handleAddParagraph = () => setSteps([...steps, { id: nanoid(), type: "paragraph", content: "" }]);
   const handleStepImageChange = (e, idx) => {
     const file = e.target.files[0] || null;
     const updated = [...steps];
@@ -119,15 +149,17 @@ function AdminPanel() {
     formData.append("category", category);
     formData.append("guideTitle", guideTitle);
     formData.append("steps", JSON.stringify(steps));
+    formData.append("path", path);
     steps.forEach(s => { if (s.imageFile) formData.append("images", s.imageFile); });
     images.forEach(img => formData.append("images", img));
 
     try {
-      const url = guideTitle && steps[0]?.newFile ? "http://localhost:5000/save-guide" : "http://localhost:5000/generate-guide";
+      const url = path ? "http://localhost:5000/save-guide" : "http://localhost:5000/generate-guide";
       const res = await fetch(url, { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setMessage("✅ Guide saved");
+      if (!path && data.slug) setPath(data.slug);
       loadGuides();
     } catch (err) {
       setMessage(`❌ ${err.message}`);
@@ -187,8 +219,13 @@ function AdminPanel() {
           <h2>Guide Content</h2>
           {steps.map((step, idx) => (
             <StepForm
-              key={idx} stepIndex={idx} stepData={step}
-              onChange={handleStepChange} onDelete={handleDeleteStep}
+              key={step.id}         // <-- use unique ID here
+              stepIndex={idx}
+              stepData={step}
+              onChange={handleStepChange}
+              onDelete={handleDeleteStep}
+              onMoveUp={moveUp}
+              onMoveDown={moveDown}
               onImageChange={handleStepImageChange}
             />
           ))}
@@ -225,7 +262,7 @@ function AdminPanel() {
 }
 
 // -----------------------------
-// STYLES
+// STYLES (unchanged)
 // -----------------------------
 const styles = {
   container: { display: "flex", maxWidth: "1600px", margin: "40px auto" },

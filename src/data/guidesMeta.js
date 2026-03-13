@@ -11,10 +11,6 @@ export const guidesMeta = {
     "intro": "This is where your privacy policy text will go.",
     "thumbnail": null
   },
-  "/excel/create-chart": {
-    "intro": "This guide explains how to create chart step-by-step. Follow the instructions below to complete the task efficiently.",
-    "thumbnail": "/assets/images/excel/create-chart/first-match.png"
-  },
   "/excel/create-pivot-table": {
     "intro": "Charts in Excel help you visualize your data quickly and clearly. Before diving into the steps, make sure your data is organized, with labels and values in proper rows and...",
     "thumbnail": "/assets/images/excel/create-pivot-table/step-1.webp"
@@ -22,10 +18,6 @@ export const guidesMeta = {
   "/excel/format-cells": {
     "intro": "",
     "thumbnail": "../../assets/images/excel/format-cells/step-1.webp"
-  },
-  "/excel/sort-data": {
-    "intro": "",
-    "thumbnail": null
   },
   "/excel/use-filters": {
     "intro": "",
@@ -144,15 +136,19 @@ export const guidesMeta = {
     "thumbnail": "/assets/images/netsuite/create-a-saved-search/undefined"
   },
   "/excel/create-pie-chart": {
-    "intro": "This guide explains how to create pie chart step-by-step. Follow the instructions below to complete the task efficiently.",
-    "thumbnail": "/assets/images/excel/create-pie-chart/undefined"
+    "intro": "This guide explains create pie chart step-by-step.",
+    "thumbnail": "/assets/images/excel/create-pie-chart/first-match.png"
   },
   "/netsuite/save-netsuite": {
-    "intro": "This guide explains save netsuite step-by-step.",
-    "thumbnail": "/assets/images/netsuite/save-netsuite/first-match.png"
+    "intro": "",
+    "thumbnail": "/assets/images/netsuite/save-netsuite/largest-value-smaller-than-lookup-value.png"
   },
   "/netsuite/dashboard-setup": {
     "intro": "This guide explains dashboard setup step-by-step.",
     "thumbnail": "/assets/images/netsuite/dashboard-setup/xlookup-function.png"
+  },
+  "/netsuite/transactional-data": {
+    "intro": "",
+    "thumbnail": "/assets/images/netsuite/transactional-data/largest-value-smaller-than-lookup-value.png"
   }
 };

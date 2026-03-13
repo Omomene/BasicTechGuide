@@ -1,35 +1,43 @@
 // src/components/StepForm.jsx
 import React, { useState, useEffect } from "react";
-import { FaTrash, FaBold, FaItalic, FaListUl, FaListOl, FaParagraph, FaHeading } from "react-icons/fa";
+import {
+  FaTrash, FaBold, FaItalic, FaListUl, FaListOl, FaParagraph, FaHeading, FaArrowUp, FaArrowDown
+} from "react-icons/fa";
+
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 
-function StepForm({
-  stepIndex,
-  stepData = { type: "step", title: "", content: "", image: "", imageFile: null, originalImage: "" },
-  onChange,
-  onDelete,
-  onImageChange
-}) {
+function StepForm({ stepIndex, stepData, onChange, onDelete, onMoveUp, onMoveDown, onImageChange }) {
   const [localData, setLocalData] = useState(stepData);
 
-  // Sync prop changes
-  useEffect(() => setLocalData(stepData), [stepData]);
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Image,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content: localData.content || "",
+    editorProps: { attributes: { class: "tiptap-editor" } },
+    onUpdate({ editor }) {
+      handleChange("content", editor.getHTML());
+    }
+  });
+
+  // Update localData and editor content when stepData changes
+  useEffect(() => {
+    setLocalData(stepData);
+    if (editor && stepData.content !== editor.getHTML()) {
+      editor.commands.setContent(stepData.content || "");
+    }
+  }, [stepData, editor]);
 
   const handleChange = (field, value) => {
     const updated = { ...localData, [field]: value };
     setLocalData(updated);
     onChange(stepIndex, updated);
   };
-
-  const editor = useEditor({
-    extensions: [StarterKit, Image, TextAlign.configure({ types: ["heading", "paragraph"] })],
-    content: localData.content || "",
-    editorProps: { attributes: { class: "tiptap-editor" } },
-    onUpdate({ editor }) { handleChange("content", editor.getHTML()); },
-  });
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
@@ -38,23 +46,23 @@ function StepForm({
     if (onImageChange) onImageChange(e, stepIndex);
   };
 
-  const imageSrc = localData.imageFile
-    ? URL.createObjectURL(localData.imageFile)
-    : localData.image || localData.originalImage || "";
+  const imageSrc =
+    localData.imageFile
+      ? URL.createObjectURL(localData.imageFile)
+      : localData.image || localData.originalImage || "";
 
   return (
     <div style={styles.block}>
       {/* HEADER */}
       <div style={styles.header}>
-        <select
-          value={localData.type}
-          onChange={(e) => handleChange("type", e.target.value)}
-          style={styles.select}
-        >
-          <option value="step">Step</option>
-          <option value="paragraph">Paragraph</option>
-        </select>
-        <button onClick={() => onDelete(stepIndex)} style={styles.delete}><FaTrash /></button>
+        <div style={styles.blockType}>
+          {localData.type === "step" ? "Step Block" : "Paragraph Block"}
+        </div>
+        <div style={styles.controls}>
+          <button onClick={() => onMoveUp(stepIndex)} style={styles.moveBtn}><FaArrowUp /></button>
+          <button onClick={() => onMoveDown(stepIndex)} style={styles.moveBtn}><FaArrowDown /></button>
+          <button onClick={() => onDelete(stepIndex)} style={styles.delete}><FaTrash /></button>
+        </div>
       </div>
 
       {/* STEP TITLE */}
@@ -62,7 +70,7 @@ function StepForm({
         <input
           type="text"
           placeholder="Step title..."
-          value={localData.title}
+          value={localData.title || ""}
           onChange={(e) => handleChange("title", e.target.value)}
           style={styles.title}
         />
@@ -82,96 +90,105 @@ function StepForm({
       )}
 
       {/* EDITOR */}
-      <div style={styles.editorBox}><EditorContent editor={editor} /></div>
-
-      {/* IMAGE UPLOAD */}
-      {localData.type === "step" && (
-        <input type="file" accept="image/*" onChange={handleFileChange} style={styles.fileInput} />
-      )}
-
-      {/* PREVIEW */}
-      <div style={styles.preview}>
-        <h4>Preview</h4>
-        {localData.type === "step" && <h3 style={styles.previewTitle}>{localData.title}</h3>}
-        <div dangerouslySetInnerHTML={{ __html: localData.content }} style={styles.previewContent} />
-        {imageSrc && <img src={imageSrc} alt="preview" style={styles.previewImg} />}
+      <div style={styles.editorBox}>
+        <EditorContent editor={editor} />
       </div>
+
+      {/* IMAGE */}
+      {localData.type === "step" && (
+        <>
+          <input type="file" accept="image/*" onChange={handleFileChange} style={styles.fileInput} />
+          {imageSrc && <img src={imageSrc} alt="preview" style={styles.previewImg} />}
+        </>
+      )}
     </div>
   );
 }
 
+
 const styles = {
   block: {
-    width: "100%",
     background: "#fff",
     borderRadius: "16px",
     padding: "24px",
     marginBottom: "28px",
     border: "1px solid #e5e7eb",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-    transition: "all 0.3s ease",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.08)"
   },
-  header: { display: "flex", justifyContent: "space-between", marginBottom: "16px" },
-  select: { padding: "6px 12px", borderRadius: "8px", border: "1px solid #ccc", fontWeight: "500" },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "16px"
+  },
+
+  blockType: {
+    fontWeight: "600",
+    color: "#6b7280"
+  },
+
+  controls: {
+    display: "flex",
+    gap: "8px"
+  },
+
+  moveBtn: {
+    border: "none",
+    background: "#f3f4f6",
+    padding: "6px 10px",
+    borderRadius: "8px",
+    cursor: "pointer"
+  },
+
   delete: {
     background: "#ef4444",
     border: "none",
     color: "#fff",
-    padding: "6px 12px",
+    padding: "6px 10px",
     borderRadius: "8px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
+    cursor: "pointer"
   },
+
   title: {
     width: "100%",
     fontSize: "20px",
     padding: "12px",
     borderRadius: "10px",
     border: "1px solid #ddd",
-    marginBottom: "16px",
-    fontWeight: "600",
+    marginBottom: "16px"
   },
-  toolbar: { display: "flex", gap: "10px", borderBottom: "1px solid #eee", paddingBottom: "10px", marginBottom: "12px" },
+
+  toolbar: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "10px"
+  },
+
   toolBtn: {
     background: "#f3f4f6",
     border: "none",
     padding: "6px 10px",
     borderRadius: "8px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    fontWeight: "600",
+    cursor: "pointer"
   },
+
   editorBox: {
     minHeight: "180px",
     border: "1px solid #ddd",
     borderRadius: "12px",
     padding: "14px",
-    background: "#fafafa",
-    transition: "all 0.2s ease",
+    background: "#fafafa"
   },
+
   fileInput: {
-    marginTop: "12px",
-    borderRadius: "8px",
-    padding: "6px",
-    cursor: "pointer",
+    marginTop: "12px"
   },
-  preview: {
-    marginTop: "24px",
-    padding: "18px",
-    background: "#f8fafc",
-    borderRadius: "12px",
-    border: "1px solid #eee",
-    transition: "all 0.3s ease",
-  },
-  previewTitle: { fontSize: "18px", marginBottom: "8px", color: "#111827" },
-  previewContent: { fontSize: "15px", lineHeight: "1.6", color: "#374151" },
+
   previewImg: {
     maxWidth: "100%",
     marginTop: "12px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-    transition: "all 0.3s ease",
-  },
+    borderRadius: "10px"
+  }
 };
 
 export default StepForm;

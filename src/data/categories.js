@@ -4,20 +4,12 @@ export const categories = [
     "slug": "excel",
     "guides": [
       {
-        "title": "Create Chart",
-        "path": "/excel/create-chart"
-      },
-      {
         "title": "Create Pivot Table",
         "path": "/excel/create-pivot-table"
       },
       {
         "title": "Format Cells",
         "path": "/excel/format-cells"
-      },
-      {
-        "title": "Sort Data",
-        "path": "/excel/sort-data"
       },
       {
         "title": "Use Filters",
@@ -80,6 +72,10 @@ export const categories = [
       {
         "title": "Dashboard setup",
         "path": "/netsuite/dashboard-setup"
+      },
+      {
+        "title": "Transactional data",
+        "path": "/netsuite/transactional-data"
       }
     ]
   },
